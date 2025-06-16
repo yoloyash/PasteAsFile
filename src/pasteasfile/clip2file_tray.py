@@ -5,7 +5,7 @@ import tempfile, subprocess, pathlib, keyboard, pyperclip, atexit, os, threading
 from PIL import Image
 import pystray
 
-from spinner import show_spinner
+from .spinner import show_spinner
 
 TMP_FILES = []
 
@@ -45,7 +45,10 @@ def on_exit(icon, _item):
     os._exit(0)      # ← kill the whole process immediately
 
 def setup_tray():
-    base_path = sys._MEIPASS if getattr(sys, "frozen", False) else os.path.dirname(__file__)
+    if getattr(sys, "frozen", False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
     icon_path = os.path.join(base_path, "icon.ico")
     image = Image.open(icon_path)
     menu  = pystray.Menu(pystray.MenuItem("Exit", on_exit))
@@ -61,4 +64,5 @@ if __name__ == "__main__":
 
 
 # debug: watchmedo auto-restart --patterns="*.py" --recursive -- python clip2file_tray.py
-# build: pyinstaller clip2file_tray.py --onefile --noconsole --add-data "icon.ico;." --add-data "spinner.gif;."
+# build: pyinstaller clip2file_tray.py --onefile --noconsole \
+#        --add-data "../assets/icon.ico;." --add-data "../assets/spinner.gif;."
