@@ -46,11 +46,11 @@ def on_exit(icon, _item):
 
 def setup_tray():
     if getattr(sys, "frozen", False):
-        base_path = sys._MEIPASS
+        base_path = pathlib.Path(sys._MEIPASS)
     else:
-        base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
-    icon_path = os.path.join(base_path, "icon.ico")
-    image = Image.open(icon_path)
+        base_path = pathlib.Path(__file__).resolve().parents[2] / "assets"
+    icon_path = base_path / "icon.ico"
+    image = Image.open(str(icon_path))
     menu  = pystray.Menu(pystray.MenuItem("Exit", on_exit))
     icon  = pystray.Icon("Paste as File", image, "Paste as File", menu)
     threading.Thread(target=icon.run, daemon=True).start()
@@ -65,4 +65,4 @@ if __name__ == "__main__":
 
 # debug: watchmedo auto-restart --patterns="*.py" --recursive -- python clip2file_tray.py
 # build: pyinstaller clip2file_tray.py --onefile --noconsole \
-#        --add-data "../assets/icon.ico;." --add-data "../assets/spinner.gif;."
+#        --add-data "../../assets/icon.ico;." --add-data "../../assets/spinner.gif;."
