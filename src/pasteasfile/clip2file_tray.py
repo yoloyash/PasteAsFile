@@ -63,6 +63,7 @@ if __name__ == "__main__":
     keyboard.wait()          # still blocks, but on_exit will now kill this too
 
 
-# debug: watchmedo auto-restart --patterns="*.py" --recursive -- python clip2file_tray.py
-# build: pyinstaller clip2file_tray.py --onefile --noconsole \
-#        --add-data "../../assets/icon.ico;." --add-data "../../assets/spinner.gif;."
+# debug command (to be run from root)
+# watchmedo auto-restart --patterns="*.py" --recursive -- python -m pasteasfile.clip2file_tray
+# build (yet to be fixed)
+# pyinstaller clip2file_tray.py --onefile --noconsole --add-data "../../assets/icon.ico;." --add-data "../../assets/spinner.gif;."
