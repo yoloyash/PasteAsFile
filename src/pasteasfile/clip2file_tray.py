@@ -5,7 +5,7 @@ import tempfile, subprocess, pathlib, keyboard, pyperclip, atexit, os, threading
 from PIL import Image
 import pystray
 
-from .spinner import show_spinner
+from pasteasfile.spinner import show_spinner
 
 TMP_FILES = []
 
@@ -65,5 +65,5 @@ if __name__ == "__main__":
 
 # debug command (to be run from root)
 # watchmedo auto-restart --patterns="*.py" --recursive -- python -m pasteasfile.clip2file_tray
-# build (yet to be fixed)
+# build (to be run from src/pasteasfile)
 # pyinstaller clip2file_tray.py --onefile --noconsole --add-data "../../assets/icon.ico;." --add-data "../../assets/spinner.gif;."
