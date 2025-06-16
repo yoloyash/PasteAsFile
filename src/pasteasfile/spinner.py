@@ -4,7 +4,10 @@ import threading, tkinter as tk, sys, os
 from PIL import Image, ImageTk
 
 # SPINNER_PATH = "spinner.gif"
-base_path = sys._MEIPASS if getattr(sys, "frozen", False) else os.path.dirname(__file__)
+if getattr(sys, "frozen", False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
 SPINNER_PATH = os.path.join(base_path, "spinner.gif")
 DURATION_MS  = 1000            # how long to keep it on-screen
 ARC_MS       = 40             # frame delay
