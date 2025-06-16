@@ -2,3 +2,6 @@ keyboard
 pyperclip
 pillow
 pystray
+
+watchdog
+pyinstaller
