@@ -39,4 +39,4 @@ pyinstaller run.py --onefile --noconsole `
 ## Release
 
 
-You can download the latest release here.
+You can download the latest release [here](https://github.com/yoloyash/PasteAsFile/releases/download/v0.0.1/PasteAsFile.exe).
