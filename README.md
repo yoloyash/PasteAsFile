@@ -1,42 +1,22 @@
 # PasteAsFile
 
-This project is a Python-based Windows utility that runs in the system tray. Its core function is to convert text from the clipboard into a temporary file. Triggered by a Ctrl+Alt+V hotkey, it performs the conversion and copies the new file to the clipboard, ready for pasting, confirmed by a brief visual spinner.
+A tiny Windows utility that instantly turns your clipboard text into a temporary file, ready to be pasted or attached anywhere.
 
-## Setup (to be run from `root` directory)
+[**➡️ Download the Latest Release**](https://github.com/yoloyash/PasteAsFile/releases/latest)
 
-Install the required Python packages with:
+<!-- You can add a GIF here later -->
 
-```bash
-pip install -r requirements.txt
-```
+## How It Works
 
-### Development
+1. Run the `PasteAsFile.exe` application. An icon will appear in your system tray.
+2. Copy any text to your clipboard.
+3. Press **`Ctrl`+`Alt`+`V`**.
+4. The text is saved as a temporary file, and that file is copied to your clipboard, ready to be pasted (e.g., into an email attachment, Slack, Discord, etc.).
 
-1. Install library
+## A Note on Security
 
-```bash
-pip install -v -e .
-```
+When you run the executable for the first time, Windows Defender SmartScreen may show a warning. This is normal for new applications from independent developers that are not digitally signed.
 
-2. Run dev:
+The application is safe. If you are cautious, you are welcome to inspect the source code and build it yourself.
 
-```bash
-watchmedo auto-restart --patterns="*.py" --recursive -- python -m pasteasfile.clip2file_tray
-```
-
-### Building
-
-To generate a standalone executable use `pyinstaller` from the
-`src/pasteasfile` directory:
-
-```bash
-pyinstaller run.py --onefile --noconsole `
-    --name PasteAsFile `
-    --add-data "assets/icon.ico;." `
-    --add-data "assets/spinner.gif;."
-```
-
-## Release
-
-
-You can download the latest release [here](https://github.com/yoloyash/PasteAsFile/releases/download/v0.0.1/PasteAsFile.exe).
+**For building instructions, see [BUILDING.md](BUILDING.md).**
