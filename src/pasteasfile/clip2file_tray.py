@@ -61,9 +61,3 @@ if __name__ == "__main__":
     icon = setup_tray()
     keyboard.add_hotkey("ctrl+alt+v", copy_text_as_file, suppress=False)
     keyboard.wait()          # still blocks, but on_exit will now kill this too
-
-
-# debug command (to be run from root)
-# watchmedo auto-restart --patterns="*.py" --recursive -- python -m pasteasfile.clip2file_tray
-# build (to be run from src/pasteasfile)
-# pyinstaller clip2file_tray.py --onefile --noconsole --add-data "../../assets/icon.ico;." --add-data "../../assets/spinner.gif;."
