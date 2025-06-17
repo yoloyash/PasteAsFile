@@ -1,14 +1,11 @@
 # spinner.py
 
-import threading, tkinter as tk, sys, os, pathlib
-from PIL import Image, ImageTk
+import threading
+import tkinter as tk
+from PIL import Image, ImageTk, ImageSequence
+from .utils import get_asset_path
 
-# SPINNER_PATH = "spinner.gif"
-if getattr(sys, "frozen", False):
-    base_path = pathlib.Path(sys._MEIPASS)
-else:
-    base_path = pathlib.Path(__file__).resolve().parents[2] / "assets"
-SPINNER_PATH = base_path / "spinner.gif"
+SPINNER_PATH = get_asset_path("spinner.gif")
 DURATION_MS  = 1000            # how long to keep it on-screen
 ARC_MS       = 40             # frame delay
 
@@ -22,15 +19,13 @@ def _overlay():
     w, h = 80, 80
     sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
     root.geometry(f"{w}x{h}+{(sw-w)//2}+{sh-h-60}")
-    gif = Image.open(str(SPINNER_PATH))
+    gif = Image.open(SPINNER_PATH)
     frames = []
-    try:
-        while True:
-            frame = gif.copy().resize((w, h), Image.LANCZOS)
-            frames.append(ImageTk.PhotoImage(frame))
-            gif.seek(len(frames))
-    except EOFError:
-        pass
+
+    for frame in ImageSequence.Iterator(gif):
+        resized_frame = frame.copy().resize((w, h), Image.Resampling.LANCZOS)
+        frames.append(ImageTk.PhotoImage(resized_frame))
+
     lbl = tk.Label(root, bg=key)
     lbl.pack(expand=True, fill="both")
     def animate(i=0, t=0):

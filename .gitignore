@@ -5,3 +5,6 @@ dist/
 
 # Python cache
 __pycache__/
+
+# egg info
+*.egg-info/

@@ -1,11 +1,12 @@
 # clip2file_tray.py
 
 import sys
-import tempfile, subprocess, pathlib, keyboard, pyperclip, atexit, os, threading, re
+import tempfile, subprocess, keyboard, pyperclip, atexit, os, threading, re
 from PIL import Image
 import pystray
 
-from pasteasfile.spinner import show_spinner
+from .spinner import show_spinner
+from .utils import get_asset_path
 
 TMP_FILES = []
 
@@ -45,19 +46,17 @@ def on_exit(icon, _item):
     os._exit(0)      # ← kill the whole process immediately
 
 def setup_tray():
-    if getattr(sys, "frozen", False):
-        base_path = pathlib.Path(sys._MEIPASS)
-    else:
-        base_path = pathlib.Path(__file__).resolve().parents[2] / "assets"
-    icon_path = base_path / "icon.ico"
-    image = Image.open(str(icon_path))
+    image = Image.open(get_asset_path("icon.ico"))
     menu  = pystray.Menu(pystray.MenuItem("Exit", on_exit))
     icon  = pystray.Icon("Paste as File", image, "Paste as File", menu)
     threading.Thread(target=icon.run, daemon=True).start()
     return icon
 
-if __name__ == "__main__":
+def main():
     atexit.register(lambda: [os.unlink(f) for f in TMP_FILES if os.path.exists(f)])
     icon = setup_tray()
     keyboard.add_hotkey("ctrl+alt+v", copy_text_as_file, suppress=False)
     keyboard.wait()          # still blocks, but on_exit will now kill this too
+
+if __name__ == "__main__":
+    main()
