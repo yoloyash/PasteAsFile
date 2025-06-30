@@ -10,6 +10,7 @@ dependencies = [
     "pillow",
     "pyperclip",
     "keyboard",
+    "tkinterdnd2",
 ]
 
 [build-system]

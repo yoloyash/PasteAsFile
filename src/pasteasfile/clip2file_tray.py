@@ -7,11 +7,12 @@ import pystray
 import tkinter as tk
 from tkinter import ttk
 
-from .spinner import show_spinner
+from .spinner import show_spinner, show_drag_icon
 from .utils import get_asset_path
 
 TMP_FILES = []
 DEFAULT_EXT = ".py"
+LAST_FILE = None
 
 def copy_text_as_file():
     data = pyperclip.paste()
@@ -38,6 +39,18 @@ def copy_text_as_file():
         creationflags=subprocess.CREATE_NO_WINDOW
     )
     show_spinner()
+    return path
+
+def handle_hotkey():
+    """Create file or show drag icon if a file was just created."""
+    global LAST_FILE
+    if LAST_FILE and os.path.exists(LAST_FILE):
+        show_drag_icon(LAST_FILE)
+        LAST_FILE = None
+    else:
+        path = copy_text_as_file()
+        if path:
+            LAST_FILE = path
 
 def set_default_extension(icon, _item):
     """Show a tiny dialog to choose the default file extension."""
@@ -109,7 +122,7 @@ def setup_tray():
 def main():
     atexit.register(lambda: [os.unlink(f) for f in TMP_FILES if os.path.exists(f)])
     icon = setup_tray()
-    keyboard.add_hotkey("ctrl+alt+v", copy_text_as_file, suppress=False)
+    keyboard.add_hotkey("ctrl+alt+v", handle_hotkey, suppress=False)
     keyboard.wait()          # still blocks, but on_exit will now kill this too
 
 if __name__ == "__main__":

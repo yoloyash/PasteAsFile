@@ -5,3 +5,4 @@ pystray
 
 watchdog
 pyinstaller
+tkinterdnd2
