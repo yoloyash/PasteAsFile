@@ -14,7 +14,7 @@ A tiny Windows utility that instantly turns your clipboard text into a temporary
 4. The text is saved as a temporary file with the configured extension (``.py`` by default).
 5. That file is copied to your clipboard, ready to be pasted (e.g., into an email attachment, Slack, Discord, etc.).
 
-Right-click the tray icon to quickly switch the default extension. A small dialog lets you pick from common options like `.py`, `.txt` or `.md`, or enter any custom extension.
+Right-click the tray icon to quickly switch the default extension. The tray menu displays the current choice, and a modern dialog lets you pick from common options like `.py`, `.txt`, or `.md`, or enter any custom extension.
 
 ## A Note on Security
 

@@ -79,6 +79,7 @@ def set_default_extension(icon, _item):
             ext = "." + ext
         if ext:
             DEFAULT_EXT = ext
+            icon.update_menu()
         root.destroy()
 
     btn = ttk.Button(frm, text="OK", command=confirm)
@@ -98,7 +99,7 @@ def on_exit(icon, _item):
 def setup_tray():
     image = Image.open(get_asset_path("icon.ico"))
     menu  = pystray.Menu(
-        pystray.MenuItem(lambda: f"Set Extension ({DEFAULT_EXT})", set_default_extension),
+        pystray.MenuItem(lambda item: f"Set Extension ({DEFAULT_EXT})", set_default_extension),
         pystray.MenuItem("Exit", on_exit)
     )
     icon  = pystray.Icon("Paste as File", image, "Paste as File", menu)
