@@ -5,7 +5,7 @@ import tempfile, subprocess, keyboard, pyperclip, atexit, os, threading, re
 from PIL import Image
 import pystray
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import ttk
 
 from .spinner import show_spinner
 from .utils import get_asset_path
@@ -40,21 +40,52 @@ def copy_text_as_file():
     show_spinner()
 
 def set_default_extension(icon, _item):
+    """Show a tiny dialog to choose the default file extension."""
     global DEFAULT_EXT
+
     root = tk.Tk()
-    root.withdraw()
-    ext = simpledialog.askstring(
-        "Default Extension",
-        "Enter default file extension (include .)",
-        initialvalue=DEFAULT_EXT,
-        parent=root,
-    )
-    if ext:
+    root.title("Default Extension")
+    root.resizable(False, False)
+
+    frm = ttk.Frame(root, padding=10)
+    frm.pack(fill="both", expand=True)
+
+    ttk.Label(frm, text="Choose extension").pack(anchor="w")
+
+    common = [".py", ".txt", ".md", "Other..."]
+    choice = tk.StringVar(value=DEFAULT_EXT if DEFAULT_EXT in common else "Other...")
+    combo = ttk.Combobox(frm, values=common, textvariable=choice, state="readonly")
+    combo.pack(fill="x", pady=5)
+
+    custom_var = tk.StringVar(value=DEFAULT_EXT if DEFAULT_EXT not in common else "")
+    entry = ttk.Entry(frm, textvariable=custom_var)
+    entry.pack(fill="x")
+
+    def update_state(*_):
+        if choice.get() == "Other...":
+            entry.configure(state="normal")
+            entry.focus()
+        else:
+            entry.configure(state="disabled")
+            custom_var.set(choice.get())
+
+    choice.trace_add("write", update_state)
+    update_state()
+
+    def confirm():
+        ext = custom_var.get() if choice.get() == "Other..." else choice.get()
         ext = ext.strip()
-        if not ext.startswith('.'):
-            ext = '.' + ext
-        DEFAULT_EXT = ext
-    root.destroy()
+        if ext and not ext.startswith("."):
+            ext = "." + ext
+        if ext:
+            DEFAULT_EXT = ext
+            icon.update_menu()
+        root.destroy()
+
+    btn = ttk.Button(frm, text="OK", command=confirm)
+    btn.pack(pady=8)
+
+    root.mainloop()
 
 def on_exit(icon, _item):
     # clean up files & hooks, stop tray, then fully exit
@@ -68,7 +99,7 @@ def on_exit(icon, _item):
 def setup_tray():
     image = Image.open(get_asset_path("icon.ico"))
     menu  = pystray.Menu(
-        pystray.MenuItem("Set Extension", set_default_extension),
+        pystray.MenuItem(lambda item: f"Set Extension ({DEFAULT_EXT})", set_default_extension),
         pystray.MenuItem("Exit", on_exit)
     )
     icon  = pystray.Icon("Paste as File", image, "Paste as File", menu)
