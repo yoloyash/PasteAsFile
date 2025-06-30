@@ -4,11 +4,14 @@ import sys
 import tempfile, subprocess, keyboard, pyperclip, atexit, os, threading, re
 from PIL import Image
 import pystray
+import tkinter as tk
+from tkinter import simpledialog
 
 from .spinner import show_spinner
 from .utils import get_asset_path
 
 TMP_FILES = []
+DEFAULT_EXT = ".py"
 
 def copy_text_as_file():
     data = pyperclip.paste()
@@ -18,12 +21,12 @@ def copy_text_as_file():
     first = next((l for l in lines if l.strip()), '')
     words = re.findall(r'\w+', first)
     name = '_'.join(words[:5]).lower() or 'clipboard'
-    filename = f"{name}.py"
+    filename = f"{name}{DEFAULT_EXT}"
     temp_dir = tempfile.gettempdir()
     path = os.path.join(temp_dir, filename)
     count = 1
     while os.path.exists(path):
-        path = os.path.join(temp_dir, f"{name}_{count}.py")
+        path = os.path.join(temp_dir, f"{name}_{count}{DEFAULT_EXT}")
         count += 1
     with open(path, 'w', encoding='utf-8') as f:
         f.write(data)
@@ -36,6 +39,23 @@ def copy_text_as_file():
     )
     show_spinner()
 
+def set_default_extension(icon, _item):
+    global DEFAULT_EXT
+    root = tk.Tk()
+    root.withdraw()
+    ext = simpledialog.askstring(
+        "Default Extension",
+        "Enter default file extension (include .)",
+        initialvalue=DEFAULT_EXT,
+        parent=root,
+    )
+    if ext:
+        ext = ext.strip()
+        if not ext.startswith('.'):
+            ext = '.' + ext
+        DEFAULT_EXT = ext
+    root.destroy()
+
 def on_exit(icon, _item):
     # clean up files & hooks, stop tray, then fully exit
     for f in TMP_FILES:
@@ -47,7 +67,10 @@ def on_exit(icon, _item):
 
 def setup_tray():
     image = Image.open(get_asset_path("icon.ico"))
-    menu  = pystray.Menu(pystray.MenuItem("Exit", on_exit))
+    menu  = pystray.Menu(
+        pystray.MenuItem("Set Extension", set_default_extension),
+        pystray.MenuItem("Exit", on_exit)
+    )
     icon  = pystray.Icon("Paste as File", image, "Paste as File", menu)
     threading.Thread(target=icon.run, daemon=True).start()
     return icon

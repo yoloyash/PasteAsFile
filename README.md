@@ -11,7 +11,10 @@ A tiny Windows utility that instantly turns your clipboard text into a temporary
 1. Run the `PasteAsFile.exe` application. An icon will appear in your system tray.
 2. Copy any text to your clipboard.
 3. Press **`Ctrl`+`Alt`+`V`**.
-4. The text is saved as a temporary file, and that file is copied to your clipboard, ready to be pasted (e.g., into an email attachment, Slack, Discord, etc.).
+4. The text is saved as a temporary file with the configured extension (``.py`` by default).
+5. That file is copied to your clipboard, ready to be pasted (e.g., into an email attachment, Slack, Discord, etc.).
+
+Right-click the tray icon to change the default extension if you frequently work with other file types.
 
 ## A Note on Security
 
