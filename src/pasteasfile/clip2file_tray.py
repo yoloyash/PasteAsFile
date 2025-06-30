@@ -73,6 +73,7 @@ def set_default_extension(icon, _item):
     update_state()
 
     def confirm():
+        global DEFAULT_EXT
         ext = custom_var.get() if choice.get() == "Other..." else choice.get()
         ext = ext.strip()
         if ext and not ext.startswith("."):
