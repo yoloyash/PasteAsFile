@@ -13,3 +13,4 @@ __pycache__/
 repomix.config.json
 repomix-output.md
 .repomixignore
+CLAUDE.md
