@@ -2,16 +2,20 @@
 
 import sys
 import tempfile, subprocess, keyboard, pyperclip, atexit, os, threading, re
-from PIL import Image
-import pystray
+import queue
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image
+import pystray
 
-from .spinner import show_spinner
+from .spinner import SpinnerManager
 from .utils import get_asset_path
 
 TMP_FILES = []
 DEFAULT_EXT = ".py"
+
+# Queue for thread communication
+ui_queue = queue.Queue()
 
 def copy_text_as_file():
     data = pyperclip.paste()
@@ -37,30 +41,36 @@ def copy_text_as_file():
         capture_output=True,
         creationflags=subprocess.CREATE_NO_WINDOW
     )
-    show_spinner()
+    # Queue spinner request instead of direct call
+    ui_queue.put(('show_spinner', None))
 
 def set_default_extension(icon, _item):
     """Show a tiny dialog to choose the default file extension."""
-    global DEFAULT_EXT
+    # Queue the extension dialog request
+    ui_queue.put(('show_extension_dialog', icon))
 
-    root = tk.Tk()
+def _show_extension_dialog(icon):
+    """Actually show the extension dialog - runs in main thread."""
+    global DEFAULT_EXT
+    
+    root = tk.Toplevel()  # Use Toplevel instead of Tk()
     root.title("Default Extension")
     root.resizable(False, False)
-
+    
     frm = ttk.Frame(root, padding=10)
     frm.pack(fill="both", expand=True)
-
+    
     ttk.Label(frm, text="Choose extension").pack(anchor="w")
-
+    
     common = [".py", ".txt", ".md", "Other..."]
     choice = tk.StringVar(value=DEFAULT_EXT if DEFAULT_EXT in common else "Other...")
     combo = ttk.Combobox(frm, values=common, textvariable=choice, state="readonly")
     combo.pack(fill="x", pady=5)
-
+    
     custom_var = tk.StringVar(value=DEFAULT_EXT if DEFAULT_EXT not in common else "")
     entry = ttk.Entry(frm, textvariable=custom_var)
     entry.pack(fill="x")
-
+    
     def update_state(*_):
         if choice.get() == "Other...":
             entry.configure(state="normal")
@@ -68,10 +78,10 @@ def set_default_extension(icon, _item):
         else:
             entry.configure(state="disabled")
             custom_var.set(choice.get())
-
+    
     choice.trace_add("write", update_state)
     update_state()
-
+    
     def confirm():
         global DEFAULT_EXT
         ext = custom_var.get() if choice.get() == "Other..." else choice.get()
@@ -82,11 +92,14 @@ def set_default_extension(icon, _item):
             DEFAULT_EXT = ext
             icon.update_menu()
         root.destroy()
-
+    
     btn = ttk.Button(frm, text="OK", command=confirm)
     btn.pack(pady=8)
-
-    root.mainloop()
+    
+    # Make dialog modal
+    root.transient()
+    root.grab_set()
+    root.wait_window()
 
 def on_exit(icon, _item):
     # clean up files & hooks, stop tray, then fully exit
@@ -95,7 +108,7 @@ def on_exit(icon, _item):
         except: pass
     keyboard.unhook_all()
     icon.stop()
-    os._exit(0)      # ← kill the whole process immediately
+    ui_queue.put(('quit', None))
 
 def setup_tray():
     image = Image.open(get_asset_path("icon.ico"))
@@ -107,11 +120,46 @@ def setup_tray():
     threading.Thread(target=icon.run, daemon=True).start()
     return icon
 
+def process_ui_queue(root, spinner_manager, icon):
+    """Process UI events from the queue - runs in main thread."""
+    try:
+        while True:
+            try:
+                action, data = ui_queue.get_nowait()
+                if action == 'show_spinner':
+                    spinner_manager.show()
+                elif action == 'show_extension_dialog':
+                    _show_extension_dialog(data)
+                elif action == 'quit':
+                    root.quit()
+                    return
+            except queue.Empty:
+                break
+    finally:
+        # Schedule next check
+        root.after(50, lambda: process_ui_queue(root, spinner_manager, icon))
+
 def main():
     atexit.register(lambda: [os.unlink(f) for f in TMP_FILES if os.path.exists(f)])
+    
+    # Create hidden root window for Tkinter
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    
+    # Create spinner manager
+    spinner_manager = SpinnerManager(root)
+    
+    # Setup tray icon
     icon = setup_tray()
+    
+    # Setup hotkey
     keyboard.add_hotkey("ctrl+alt+v", copy_text_as_file, suppress=False)
-    keyboard.wait()          # still blocks, but on_exit will now kill this too
+    
+    # Start processing UI queue
+    root.after(50, lambda: process_ui_queue(root, spinner_manager, icon))
+    
+    # Run Tkinter main loop in main thread
+    root.mainloop()
 
 if __name__ == "__main__":
     main()
